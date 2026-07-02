@@ -32,8 +32,8 @@ The project adds an AI support assistant for collection owners. It is designed t
 This repository is an honest implementation status:
 
 - The TypeScript service and health endpoint are available.
-- Qwen Cloud API integration is implemented and has been tested locally against the real Qwen Cloud endpoint.
-- Alibaba Cloud deployment is planned/in progress and is not yet claimed as complete.
+- Qwen Cloud API integration is implemented and verified working both locally and on the live deployment.
+- The backend is deployed and verified on Alibaba Cloud ECS at `http://47.87.133.172:3000` (see [Alibaba Cloud Deployment](#alibaba-cloud-deployment) below). Screenshot proof is still pending.
 - The existing SarafuPay payment platform remains the source of collection and payment data.
 
 ## Qwen Cloud Usage
@@ -47,11 +47,19 @@ The backend sends a structured, privacy-filtered prompt to Qwen Cloud through th
 
 The agent only receives the privacy-filtered collection/payment fields shown in the test request below — no raw provider payloads, full credentials, or unnecessary personally identifiable information.
 
-## Planned Alibaba Cloud Deployment
+## Alibaba Cloud Deployment
 
-The starter service is intended to be deployed on an appropriate Alibaba Cloud compute service after the Qwen integration is working. Deployment details, the region, endpoint, health check, screenshots, and verification evidence will be recorded in [docs/ALIBABA_CLOUD_DEPLOYMENT.md](./docs/ALIBABA_CLOUD_DEPLOYMENT.md).
+The backend is deployed and verified on Alibaba Cloud ECS:
 
-No completed Alibaba Cloud deployment is claimed in this repository.
+- **Region:** Germany (Frankfurt)
+- **Instance:** `ecs.n4.small` (1 vCPU, 2 GiB RAM), Ubuntu 24.04 (64-bit)
+- **Process manager:** PM2, app name `sarafupay-ai-agent`
+- **Public endpoint:** `http://47.87.133.172:3000`
+- **Health check:** `http://47.87.133.172:3000/health` → verified `success: true`
+- **Qwen integration status:** `http://47.87.133.172:3000/api/agent/status` → verified `qwenCloudIntegration: "implemented"`, `qwenApiKeyConfigured: true` (no key value exposed)
+- **Collection summary:** `POST http://47.87.133.172:3000/api/agent/collection-summary` → verified `success: true` with a live `qwen3.7-plus` response
+
+`QWEN_API_KEY` is stored only in the ECS instance's `.env` file and is never committed to this repository. Full setup commands, security group rules, and the verification checklist are recorded in [docs/ALIBABA_CLOUD_DEPLOYMENT.md](./docs/ALIBABA_CLOUD_DEPLOYMENT.md). Screenshot proof of the deployment is still pending capture.
 
 ## Architecture
 
@@ -205,7 +213,7 @@ If `QWEN_API_KEY` is not set, the endpoint returns HTTP 500 with `{"error": "QWE
 
 - [Architecture](./docs/ARCHITECTURE.md)
 - [AI agent design](./docs/AI_AGENT_DESIGN.md)
-- [Alibaba Cloud deployment template](./docs/ALIBABA_CLOUD_DEPLOYMENT.md)
+- [Alibaba Cloud deployment record](./docs/ALIBABA_CLOUD_DEPLOYMENT.md)
 - [Devpost submission draft](./docs/DEVPOST_SUBMISSION.md)
 
 ## Devpost Submission Checklist
@@ -215,7 +223,8 @@ If `QWEN_API_KEY` is not set, the endpoint returns HTTP 500 with `{"error": "QWE
 - [x] AI agent workflow and safety design
 - [x] Alibaba Cloud deployment proof template
 - [x] Working Qwen Cloud API integration
-- [ ] Alibaba Cloud deployment proof
+- [x] Alibaba Cloud ECS deployment live and verified
+- [ ] Alibaba Cloud deployment screenshot proof
 - [ ] Architecture diagram uploaded separately to Devpost
 - [ ] Demo video
 - [ ] Final Devpost review and submission
