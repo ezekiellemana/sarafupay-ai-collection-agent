@@ -3,7 +3,7 @@ import "dotenv/config";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 
 import { generateCollectionSummary, type CollectionSummaryInput } from "./services/collectionAgent.js";
-import { QWEN_MODEL } from "./lib/qwen.js";
+import { QWEN_MODEL, describeQwenError, getQwenBaseUrlHost, isQwenApiKeyConfigured } from "./lib/qwen.js";
 
 const DEFAULT_PORT = 3000;
 const parsedPort = Number.parseInt(process.env.PORT ?? "", 10);
@@ -88,7 +88,7 @@ async function handleCollectionSummary(
       sendJson(response, 500, { success: false, error: error.message });
       return;
     }
-    console.error("Qwen collection summary request failed:", error);
+    console.error("Qwen collection summary request failed:", describeQwenError(error));
     sendJson(response, 500, {
       success: false,
       error: "Failed to generate collection summary.",
@@ -110,6 +110,9 @@ const server = createServer((request, response) => {
     sendJson(response, 200, {
       service: "sarafupay-ai-collection-agent",
       qwenCloudIntegration: "implemented",
+      qwenModel: QWEN_MODEL,
+      qwenBaseUrlHost: getQwenBaseUrlHost(),
+      qwenApiKeyConfigured: isQwenApiKeyConfigured(),
       alibabaCloudDeployment: "planned",
       humanReviewRequired: true,
     });
